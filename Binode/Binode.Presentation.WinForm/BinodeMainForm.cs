@@ -68,7 +68,7 @@ namespace Binode.Presentation.WinForm
         {
             listView1.Items.Clear();
 
-            ListViewDoldur(e.Node);
+            ListViewIcerigeGoreDoldur(e.Node);
         }
 
         private void ListViewDoldur(TreeNode node)
@@ -106,6 +106,76 @@ namespace Binode.Presentation.WinForm
             }
         }
 
+        private void ListViewIcerigeGoreDoldur(TreeNode node)
+        {
+            var kategori = node.Tag as Kategori;
+
+            //Hatalı olabilir
+            if (kategori?.Icerik?.Count == null)
+            {
+                return;
+            }
+
+            var groupMetin = new ListViewGroup();
+            groupMetin.Name = IcerikTipi.Metin.ToString();
+            groupMetin.Header = IcerikTipi.Metin.ToString();
+
+            var groupPdf = new ListViewGroup();
+            groupPdf.Name = IcerikTipi.Pdf.ToString();
+            groupPdf.Header = IcerikTipi.Pdf.ToString();
+
+            var groupVideo = new ListViewGroup();
+            groupVideo.Name = IcerikTipi.Video.ToString();
+            groupVideo.Header = IcerikTipi.Video.ToString();
+
+            var groupSes = new ListViewGroup();
+            groupSes.Name = IcerikTipi.Ses.ToString();
+            groupSes.Header = IcerikTipi.Ses.ToString();
+
+            foreach (var icerik in kategori.Icerik)
+            {
+                if (icerik.Tip == IcerikTipi.Metin)
+                {
+                    var li = new ListViewItem(new[] { icerik.Isim, kategori.Isim }, icerik.Tip.ToString().ToLower(), groupMetin);
+                    li.Tag = icerik;
+                    listView1.Items.Add(li);
+                }
+                else if (icerik.Tip == IcerikTipi.Pdf)
+                {
+                    var li = new ListViewItem(new[] { icerik.Isim, kategori.Isim }, icerik.Tip.ToString().ToLower(), groupPdf);
+                    li.Tag = icerik;
+                    listView1.Items.Add(li);
+                }
+                else if (icerik.Tip == IcerikTipi.Video)
+                {
+                    var li = new ListViewItem(new[] { icerik.Isim, kategori.Isim }, icerik.Tip.ToString().ToLower(), groupVideo);
+                    li.Tag = icerik;
+                    listView1.Items.Add(li);
+                }
+                if (icerik.Tip == IcerikTipi.Ses)
+                {
+                    var li = new ListViewItem(new[] { icerik.Isim, kategori.Isim }, icerik.Tip.ToString().ToLower(), groupSes);
+                    li.Tag = icerik;
+                    listView1.Items.Add(li);
+                }
+            }
+
+            //listView1.Groups.Add(group);
+
+            if (node.Nodes != null)
+            {
+                foreach (TreeNode subNode in node.Nodes)
+                {
+                    ListViewIcerigeGoreDoldur(subNode);
+                }
+            }
+
+            listView1.Groups.Add(groupMetin);
+            listView1.Groups.Add(groupPdf);
+            listView1.Groups.Add(groupVideo);
+            listView1.Groups.Add(groupSes);
+        }
+
         private void treeKategori_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -135,17 +205,18 @@ namespace Binode.Presentation.WinForm
         private void RefreshListView()
         {
             listView1.Items.Clear();
-            ListViewDoldur(treeKategori.SelectedNode);
+            ListViewIcerigeGoreDoldur(treeKategori.SelectedNode);
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             string kategoriAdi = Interaction.InputBox("Kategori adını giriniz.");
             var anaKategori = _rightClicknode.Tag as Kategori;
-            var yeniKAtegori = new Kategori {
+            var yeniKAtegori = new Kategori
+            {
                 Isim = kategoriAdi,
                 UstKategori = anaKategori,
-                EklenmeTarihi = DateTime.Now ,
+                EklenmeTarihi = DateTime.Now,
                 //AltKategori = new List<Kategori>()
             };
 
@@ -206,7 +277,8 @@ namespace Binode.Presentation.WinForm
                     break;
                 case IcerikTipi.Ses:
                     break;
-                case IcerikTipi.Video:ShowVideoContentPlayerForm();
+                case IcerikTipi.Video:
+                    ShowVideoContentPlayerForm();
                     break;
                 default:
                     break;
